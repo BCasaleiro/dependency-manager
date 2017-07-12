@@ -41,15 +41,14 @@ public class DepManager
     */
     public void instantiateServices () {
         services = new ArrayList<Service>();
+        services.add(new ServiceA("1"));
+        services.add(new ServiceB("2"));
+        services.add(new ServiceC("3"));
+        services.add(new ServiceD("4"));
+
         threads = new ArrayList<Thread>();
-
-        services.add(new ServiceA());
-        services.add(new ServiceB());
-        services.add(new ServiceC());
-        services.add(new ServiceD());
-
         for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
-            threads.add(new Thread(services.get(i)));
+            threads.add(new Thread());
         }
     }
 
@@ -119,7 +118,8 @@ public class DepManager
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting service " + index + ".");
         service.setRunning(true);
-        (threads.get(index)).start();
+        threads.set(index,new Thread(service));
+        threads.get(index).start();
         if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " started.");
     }
 
@@ -162,7 +162,6 @@ public class DepManager
         if ( DEBUG ) System.out.println("[DEBUG] Stopping service " + index + ".");
         service.setRunning(false);
         service.stop();
-        (threads.get(index)).interrupt();
         if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " stopped.");
     }
 
@@ -187,7 +186,8 @@ public class DepManager
     * @param  index  receive Service index to kill
     */
     public void kill( int index ) {
-        (threads.get(index)).interrupt();
+        services.get(index).setRunning(false);
+        (new Thread(threads.get(index))).interrupt();
     }
 
 }
