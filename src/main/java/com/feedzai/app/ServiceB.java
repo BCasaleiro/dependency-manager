@@ -1,27 +1,36 @@
 package com.feedzai.app;
 
+import java.lang.InterruptedException;
+
 /**
  * Dummy Test Service
  * Service B
  */
 public class ServiceB extends Service
 {
-    public ServiceB ()
+    public ServiceB (String monitor)
     {
-
+        this.monitor = monitor;
     }
 
     public void start()
     {
         System.out.println("[B] I am here! I am helping!");
-        while (!shutdown) {
-
+        try {
+            synchronized (monitor) {
+                monitor.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
     }
 
     public void stop()
     {
         System.out.println("[B] Stopping. Bye!");
-        shutdown = true;
+        synchronized (monitor) {
+            monitor.notify();
+        }
     }
 }
