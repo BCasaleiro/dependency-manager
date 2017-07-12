@@ -19,7 +19,7 @@ public abstract class Service implements Runnable
 
     public void run()
     {
-        running = true;
+        // running = true;
         start();
     }
 
@@ -37,6 +37,10 @@ public abstract class Service implements Runnable
 
     public void removeDependency(Integer index) {
         dependsOn.remove(index);
+    }
+
+    public void setRunning(Boolean running) {
+        this.running = running;
     }
 
     public Boolean isRunning() {

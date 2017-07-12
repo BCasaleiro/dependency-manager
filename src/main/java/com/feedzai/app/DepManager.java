@@ -5,6 +5,7 @@ import java.io.FileReader;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import java.io.IOException;
 
@@ -23,8 +24,11 @@ public class DepManager
         put("d", 3);
     }};
 
+    private static final boolean DEBUG = true;
+
     /**
     * Basic Dependency Manager Constructor
+    *
     */
     public DepManager() { }
 
@@ -86,12 +90,45 @@ public class DepManager
         return true;
     }
 
-    private void start( Service service ) {
+    /**
+    * Start Service
+    * @param  services  receive list of available services
+    * @param  index     receive Service index to start
+    */
+    private void start( ArrayList<Service> services, Integer index ) {
+        Service service = services.get(index);
+        Iterator<Integer> dependencies;
+        Integer dependencyIndex;
 
+        dependencies = service.getDependencies();
+        while (dependencies.hasNext()) {
+            dependencyIndex = dependencies.next();
+
+            if ( DEBUG ) System.out.println("[DEBUG] " + index + " depends on " + dependencyIndex + ".");
+            if ( !services.get( dependencyIndex ).isRunning() ) {
+                start(services, dependencyIndex);
+            }
+        }
+
+        if ( DEBUG ) System.out.println("[DEBUG] Starting service " + index + ".");
+        service.setRunning(true);
+        (new Thread(service)).start();
     }
 
-    private void startAll() {
+    /**
+    * Start all Services
+    * @param  services  receive list of available services
+    */
+    private void startAll( ArrayList<Service> services ) {
+        int servicesSize = services.size();
 
+        if ( DEBUG ) System.out.println("[DEBUG] Starting all Services.");
+
+        for (int i = 0; i < servicesSize; i++) {
+            if ( !services.get(i).isRunning() ) {
+                start(services, i);
+            }
+        }
     }
 
     private void stop( Service service ) {
@@ -106,12 +143,11 @@ public class DepManager
     {
         DepManager dm = new DepManager();
 
-        ArrayList services = dm.instantiateServices();
-        System.out.println("[DEBUG] Instantiated Services.");
+        ArrayList<Service> services = dm.instantiateServices();
+        if ( DEBUG ) System.out.println("[DEBUG] Instantiated Services.");
 
         if (dm.loadDependencies(services)) {
-            System.out.println("[DEBUG] Dependencies Loaded.");
-
+            if ( DEBUG ) System.out.println("[DEBUG] Dependencies Loaded.");
             
         } else {
             System.out.println("[ERROR] Invalid dependencies file.");
