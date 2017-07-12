@@ -21,7 +21,7 @@ public class ServiceB extends Service
 
     public void stop()
     {
-        System.out.println("[B] Stoping. Bye!");
+        System.out.println("[B] Stopping. Bye!");
         shutdown = true;
     }
 }
