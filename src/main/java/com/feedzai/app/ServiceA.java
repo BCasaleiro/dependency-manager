@@ -6,18 +6,21 @@ package com.feedzai.app;
  */
 public class ServiceA extends Service
 {
-    public ServiceA () {
+    public ServiceA ()
+    {
 
     }
 
-    public void start() {
+    public void start()
+    {
         System.out.println("[A] I am here! I am helping!");
         while (!shutdown) {
-        
+
         }
     }
 
-    public void stop() {
+    public void stop()
+    {
         System.out.println("[A] Stoping. Bye!");
         shutdown = true;
     }
