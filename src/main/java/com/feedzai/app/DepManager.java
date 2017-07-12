@@ -17,10 +17,10 @@ public class DepManager
     private static final String FILE = "dependencies.csv";
     private static final String DELIMITER = " ";
     private static final Hashtable<String, Integer> AVAILABLE_SERVICES = new Hashtable<String, Integer>() {{
-        put("a", 1);
-        put("b", 2);
-        put("c", 3);
-        put("d", 4);
+        put("a", 0);
+        put("b", 1);
+        put("c", 2);
+        put("d", 3);
     }};
 
     /**
@@ -28,6 +28,10 @@ public class DepManager
     */
     public DepManager() { }
 
+    /**
+    * Instantiate Available Services
+    * @return      available services list
+    */
     private ArrayList<Service> instantiateServices () {
         ArrayList<Service> services = new ArrayList<Service>();
         services.add(new ServiceA());
@@ -40,9 +44,10 @@ public class DepManager
 
     /**
     * Load dependencies into
-    * @return      if there are problems in the file
+    * @param  services  receive list of available services
+    * @return           if there are problems in the file
     */
-    private Boolean loadDependencies() {
+    private Boolean loadDependencies(ArrayList<Service> services) {
         FileReader fr = null;
         BufferedReader br = null;
         String line;
@@ -56,7 +61,7 @@ public class DepManager
                 dependency = line.split(DELIMITER);
 
                 if ( AVAILABLE_SERVICES.containsKey(dependency[0]) && AVAILABLE_SERVICES.containsKey(dependency[1]) ) {
-
+                    services.get( AVAILABLE_SERVICES.get(dependency[0]) ).addDependency( AVAILABLE_SERVICES.get(dependency[1]) );
                 } else {
                     return false;
                 }
@@ -101,10 +106,12 @@ public class DepManager
     {
         DepManager dm = new DepManager();
 
-        if (dm.loadDependencies()) {
+        ArrayList services = dm.instantiateServices();
+        System.out.println("[DEBUG] Instantiated Services.");
+
+        if (dm.loadDependencies(services)) {
             System.out.println("[DEBUG] Dependencies Loaded.");
-            ArrayList services = instantiateServices();
-            System.out.println("[DEBUG] Instantiated Services.");
+
             
         } else {
             System.out.println("[ERROR] Invalid dependencies file.");
