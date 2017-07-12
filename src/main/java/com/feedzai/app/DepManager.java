@@ -26,6 +26,9 @@ public class DepManager
 
     private static final boolean DEBUG = true;
 
+    private ArrayList<Service> services;
+    private ArrayList<Thread> threads;
+
     /**
     * Basic Dependency Manager Constructor
     *
@@ -36,22 +39,25 @@ public class DepManager
     * Instantiate Available Services
     * @return      available services list
     */
-    private ArrayList<Service> instantiateServices () {
-        ArrayList<Service> services = new ArrayList<Service>();
+    public void instantiateServices () {
+        services = new ArrayList<Service>();
+        threads = new ArrayList<Thread>();
+
         services.add(new ServiceA());
         services.add(new ServiceB());
         services.add(new ServiceC());
         services.add(new ServiceD());
 
-        return services;
+        for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
+            threads.add(new Thread(services.get(i)));
+        }
     }
 
     /**
-    * Load dependencies into
-    * @param  services  receive list of available services
+    * Load dependencies
     * @return           if there are problems in the file
     */
-    private Boolean loadDependencies(ArrayList<Service> services) {
+    public Boolean loadDependencies() {
         FileReader fr = null;
         BufferedReader br = null;
         String line;
@@ -66,6 +72,7 @@ public class DepManager
 
                 if ( AVAILABLE_SERVICES.containsKey(dependency[0]) && AVAILABLE_SERVICES.containsKey(dependency[1]) ) {
                     services.get( AVAILABLE_SERVICES.get(dependency[0]) ).addDependency( AVAILABLE_SERVICES.get(dependency[1]) );
+                    services.get( AVAILABLE_SERVICES.get(dependency[1]) ).addRequirement( AVAILABLE_SERVICES.get(dependency[0]) );
                 } else {
                     return false;
                 }
@@ -95,7 +102,7 @@ public class DepManager
     * @param  services  receive list of available services
     * @param  index     receive Service index to start
     */
-    private void start( ArrayList<Service> services, Integer index ) {
+    public void start( int index ) {
         Service service = services.get(index);
         Iterator<Integer> dependencies;
         Integer dependencyIndex;
@@ -106,51 +113,81 @@ public class DepManager
 
             if ( DEBUG ) System.out.println("[DEBUG] " + index + " depends on " + dependencyIndex + ".");
             if ( !services.get( dependencyIndex ).isRunning() ) {
-                start(services, dependencyIndex);
+                start(dependencyIndex);
             }
         }
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting service " + index + ".");
         service.setRunning(true);
-        (new Thread(service)).start();
+        (threads.get(index)).start();
+        if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " started.");
     }
 
     /**
     * Start all Services
     * @param  services  receive list of available services
     */
-    private void startAll( ArrayList<Service> services ) {
+    public void startAll() {
         int servicesSize = services.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting all Services.");
 
         for (int i = 0; i < servicesSize; i++) {
             if ( !services.get(i).isRunning() ) {
-                start(services, i);
+                start(i);
             }
         }
     }
 
-    private void stop( Service service ) {
+    /**
+    * Stop Service
+    * @param  services  receive list of available services
+    * @param  index     receive Service index to stop
+    */
+    public void stop( int index ) {
+        Service service = services.get(index);
+        Iterator<Integer> requirements;
+        Integer requirementIndex;
 
+        requirements = service.getRequirements();
+        while (requirements.hasNext()) {
+            requirementIndex = requirements.next();
+
+            if ( DEBUG ) System.out.println("[DEBUG] " + index + " required by " + requirementIndex + ".");
+            if ( services.get( requirementIndex ).isRunning() ) {
+                stop(requirementIndex);
+            }
+        }
+
+        if ( DEBUG ) System.out.println("[DEBUG] Stopping service " + index + ".");
+        service.setRunning(false);
+        service.stop();
+        (threads.get(index)).interrupt();
+        if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " stopped.");
     }
 
-    private void stopAll() {
+    /**
+    * Stop all Services
+    * @param  services  receive list of available services
+    */
+    public void stopAll() {
+        int servicesSize = services.size();
 
-    }
+        if ( DEBUG ) System.out.println("[DEBUG] Stopping all Services.");
 
-    public static void main( String[] args )
-    {
-        DepManager dm = new DepManager();
-
-        ArrayList<Service> services = dm.instantiateServices();
-        if ( DEBUG ) System.out.println("[DEBUG] Instantiated Services.");
-
-        if (dm.loadDependencies(services)) {
-            if ( DEBUG ) System.out.println("[DEBUG] Dependencies Loaded.");
-            
-        } else {
-            System.out.println("[ERROR] Invalid dependencies file.");
+        for (int i = 0; i < servicesSize; i++) {
+            if ( services.get(i).isRunning() ) {
+                stop(i);
+            }
         }
     }
+
+    /**
+    * Kill a Service
+    * @param  index  receive Service index to kill
+    */
+    public void kill( int index ) {
+        (threads.get(index)).interrupt();
+    }
+
 }
