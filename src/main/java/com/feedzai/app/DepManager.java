@@ -74,14 +74,16 @@ public class DepManager
             while ((line = br.readLine()) != null) {
                 dependency = line.split(DELIMITER);
 
+                /* Check if the input is valid */
                 if ( availableServices.containsKey(dependency[0]) && availableServices.containsKey(dependency[1]) ) {
+                    /* Add dependency */
                     services.get( availableServices.get(dependency[0]) ).addDependency( availableServices.get(dependency[1]) );
+                    /* Add requirement */
                     services.get( availableServices.get(dependency[1]) ).addRequirement( availableServices.get(dependency[0]) );
                 } else {
                     return false;
                 }
 			}
-
         } catch(IOException e) {
             e.printStackTrace();
         } finally {
@@ -98,6 +100,7 @@ public class DepManager
             }
 		}
 
+        /* Compute the ranking of each Service */
         this.updateAllRankings();
 
         return true;
@@ -114,11 +117,12 @@ public class DepManager
 
         while ( it.hasNext() ) {
             serviceIndex = it.next();
+            /* Compute every rank of the node descendents */
             if ( services.get(serviceIndex).getRanking() == 0 ) {
                 updateRanking( serviceIndex );
             }
-            services.get(index).incrementRanking( services.get(serviceIndex).getRanking() );
-            services.get(index).incrementRanking(1);
+            /* The Service ranking is incremented by each of its dependencies ranking + 1 for each */
+            services.get(index).incrementRanking( services.get(serviceIndex).getRanking() + 1 );
         }
     }
 
@@ -135,6 +139,7 @@ public class DepManager
             }
         }
 
+        /* Sort Services by ranking */
         allServicesOrder = new ArrayList<Service>(services);
         Collections.sort(allServicesOrder, new Comparator<Service>() {
             @Override
@@ -164,6 +169,7 @@ public class DepManager
         while (dependencies.hasNext()) {
             dependencyIndex = dependencies.next();
 
+            /* Guarantee that every dependency is met */
             if ( DEBUG ) System.out.println("[DEBUG] " + index + " depends on " + dependencyIndex + ".");
             if ( !services.get( dependencyIndex ).isRunning() ) {
                 start(dependencyIndex, false);
@@ -172,6 +178,7 @@ public class DepManager
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting service " + index + ".");
         threads.set(index,new Thread(service));
+        /* Check if it can be preformed in parallel */
         if ( noWait ) {
             threads.get(index).start();
         } else {
@@ -222,12 +229,14 @@ public class DepManager
         while (requirements.hasNext()) {
             requirementIndex = requirements.next();
 
+            /* Guarantee that every requirement is met */
             if ( DEBUG ) System.out.println("[DEBUG] " + index + " required by " + requirementIndex + ".");
             if ( services.get( requirementIndex ).isRunning() ) {
                 stop(requirementIndex, false);
             }
         }
 
+        /* Check if it can be preformed in parallel */
         if ( DEBUG ) System.out.println("[DEBUG] Stopping service " + index + ".");
         if (noWait) {
             service.stop();
@@ -277,6 +286,7 @@ public class DepManager
             return;
         }
 
+        /* kill all the requirements first */
         requirements = service.getRequirements();
         while (requirements.hasNext()) {
             requirementIndex = requirements.next();
@@ -287,6 +297,7 @@ public class DepManager
             }
         }
 
+        /* kill the desired service */
         if ( DEBUG ) System.out.println("[DEBUG] Killing service " + index + ".");
         services.get(index).setRunning(false);
         threads.get(index).interrupt();
