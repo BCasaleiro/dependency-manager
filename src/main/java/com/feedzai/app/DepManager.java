@@ -43,7 +43,8 @@ public class DepManager
     * Instantiate Available Services
     * @return      available services list
     */
-    public void instantiateServices() {
+    public void instantiateServices()
+    {
         services = new ArrayList<Service>();
         allServicesOrder = new ArrayList<Service>();
         services.add(new ServiceA(0, MONITOR));
@@ -61,7 +62,8 @@ public class DepManager
     * Load dependencies
     * @return           if there are problems in the file
     */
-    public Boolean loadDependencies() {
+    public Boolean loadDependencies()
+    {
         FileReader fr = null;
         BufferedReader br = null;
         String line;
@@ -107,7 +109,8 @@ public class DepManager
     * Update Ranking of a Service and its dependencies
     *
     */
-    private void updateRanking(int index) {
+    private void updateRanking(int index)
+    {
         Iterator<Integer> it = services.get(index).getDependencies();
         int serviceIndex;
 
@@ -125,7 +128,8 @@ public class DepManager
     * Update Rankings
     * Sort the Services in an Ascending order of ranking
     */
-    private void updateAllRankings() {
+    private void updateAllRankings()
+    {
 
         for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
             if ( services.get(i).getRanking() == 0 ) {
@@ -148,7 +152,8 @@ public class DepManager
     * @param  index     receive Service index to start
     * @param  noWait    boolean indicating if the wait is needed
     */
-    public void start( int index, boolean noWait ) {
+    public void start( int index, boolean noWait )
+    {
         Service service = services.get(index);
         Iterator<Integer> dependencies;
         Integer dependencyIndex;
@@ -191,7 +196,8 @@ public class DepManager
     * Start all Services
     *
     */
-    public void startAll() {
+    public void startAll()
+    {
         int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting all Services.");
@@ -208,7 +214,8 @@ public class DepManager
     * @param  index     receive Service index to stop
     * @param  noWait    boolean indicating if the wait is needed
     */
-    public void stop( int index, boolean noWait ) {
+    public void stop( int index, boolean noWait )
+    {
         Service service = services.get(index);
         Iterator<Integer> requirements;
         Integer requirementIndex;
@@ -245,7 +252,8 @@ public class DepManager
     * Stop all Services
     *
     */
-    public void stopAll() {
+    public void stopAll()
+    {
         int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Stopping all Services.");
@@ -261,7 +269,8 @@ public class DepManager
     * Kill a Service
     * @param  index  receive Service index to kill
     */
-    public void kill( int index ) {
+    public void kill( int index )
+    {
         Service service = services.get(index);
         Iterator<Integer> requirements;
         Integer requirementIndex;
@@ -290,7 +299,8 @@ public class DepManager
     * List all the running Services
     * @return  list of running services
     */
-    public ArrayList<Service> getRunningServices() {
+    public ArrayList<Service> getRunningServices()
+    {
         ArrayList<Service> output = new ArrayList<Service>();
         Service service;
         int len = services.size();
