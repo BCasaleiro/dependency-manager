@@ -8,21 +8,14 @@ import java.lang.InterruptedException;
  */
 public class ServiceD extends Service
 {
-    public ServiceD (int id)
+    public ServiceD (int id, String master)
     {
-        super(id);
+        super(id, master);
     }
 
     public void start()
     {
         System.out.println("[D] I am here! I am helping!");
-        try {
-            synchronized (monitor) {
-                monitor.wait();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public void stop()
@@ -30,6 +23,7 @@ public class ServiceD extends Service
         System.out.println("[D] Stopping. Bye!");
         synchronized (monitor) {
             monitor.notify();
+            running = false;
         }
     }
 }

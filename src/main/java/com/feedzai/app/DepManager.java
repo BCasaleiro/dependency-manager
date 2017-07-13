@@ -19,6 +19,7 @@ public class DepManager
 {
     private static final String FILE = "dependencies.csv";
     private static final String DELIMITER = " ";
+    private static final String MONITOR = "MASTER";
     private static final Hashtable<String, Integer> AVAILABLE_SERVICES = new Hashtable<String, Integer>() {{
         put("a", 0);
         put("b", 1);
@@ -45,55 +46,15 @@ public class DepManager
     public void instantiateServices() {
         services = new ArrayList<Service>();
         allServicesOrder = new ArrayList<Service>();
-        services.add(new ServiceA(0));
-        services.add(new ServiceB(1));
-        services.add(new ServiceC(2));
-        services.add(new ServiceD(3));
+        services.add(new ServiceA(0, MONITOR));
+        services.add(new ServiceB(1, MONITOR));
+        services.add(new ServiceC(2, MONITOR));
+        services.add(new ServiceD(3, MONITOR));
 
         threads = new ArrayList<Thread>();
         for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
             threads.add(new Thread());
         }
-    }
-
-    /**
-    * Update Ranking of a Service and its dependencies
-    *
-    */
-    private void updateRanking(int index) {
-        Iterator<Integer> it = services.get(index).getDependencies();
-        int serviceIndex;
-
-        while ( it.hasNext() ) {
-            serviceIndex = it.next();
-            if ( services.get(serviceIndex).getRanking() == 0 ) {
-                updateRanking( serviceIndex );
-            }
-            services.get(index).incrementRanking( services.get(serviceIndex).getRanking() );
-            services.get(index).incrementRanking(1);
-        }
-    }
-
-    /**
-    * Update Rankings
-    * Sort the Services in an Ascending order of ranking
-    */
-    private void updateAllRankings() {
-
-        for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
-            if ( services.get(i).getRanking() == 0 ) {
-                updateRanking(i);
-            }
-        }
-
-        allServicesOrder = new ArrayList<Service>(services);
-        Collections.sort(allServicesOrder, new Comparator<Service>() {
-            @Override
-            public int compare(Service a, Service b)
-            {
-                return a.getRanking().compareTo(b.getRanking());
-            }
-        });
     }
 
     /**
@@ -143,14 +104,58 @@ public class DepManager
     }
 
     /**
-    * Start Service
-    * @param  services  receive list of available services
-    * @param  index     receive Service index to start
+    * Update Ranking of a Service and its dependencies
+    *
     */
-    public void start( int index ) {
+    private void updateRanking(int index) {
+        Iterator<Integer> it = services.get(index).getDependencies();
+        int serviceIndex;
+
+        while ( it.hasNext() ) {
+            serviceIndex = it.next();
+            if ( services.get(serviceIndex).getRanking() == 0 ) {
+                updateRanking( serviceIndex );
+            }
+            services.get(index).incrementRanking( services.get(serviceIndex).getRanking() );
+            services.get(index).incrementRanking(1);
+        }
+    }
+
+    /**
+    * Update Rankings
+    * Sort the Services in an Ascending order of ranking
+    */
+    private void updateAllRankings() {
+
+        for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
+            if ( services.get(i).getRanking() == 0 ) {
+                updateRanking(i);
+            }
+        }
+
+        allServicesOrder = new ArrayList<Service>(services);
+        Collections.sort(allServicesOrder, new Comparator<Service>() {
+            @Override
+            public int compare(Service a, Service b)
+            {
+                return a.getRanking().compareTo(b.getRanking());
+            }
+        });
+    }
+
+    /**
+    * Start Service
+    * @param  index     receive Service index to start
+    * @param  noWait    boolean indicating if the wait is needed
+    */
+    public void start( int index, boolean noWait ) {
         Service service = services.get(index);
         Iterator<Integer> dependencies;
         Integer dependencyIndex;
+
+        if (service.isRunning()) {
+            return;
+        }
 
         dependencies = service.getDependencies();
         while (dependencies.hasNext()) {
@@ -158,20 +163,33 @@ public class DepManager
 
             if ( DEBUG ) System.out.println("[DEBUG] " + index + " depends on " + dependencyIndex + ".");
             if ( !services.get( dependencyIndex ).isRunning() ) {
-                start(dependencyIndex);
+                start(dependencyIndex, false);
             }
         }
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting service " + index + ".");
-        service.setRunning(true);
         threads.set(index,new Thread(service));
-        threads.get(index).start();
+        if ( noWait ) {
+            threads.get(index).start();
+        } else {
+            try {
+                synchronized (MONITOR) {
+                    threads.get(index).start();
+                    MONITOR.wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Gotta go, can't wait!");
+                Thread.currentThread().interrupt();
+            }
+        }
+
+
         if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " started.");
     }
 
     /**
     * Start all Services
-    * @param  services  receive list of available services
+    *
     */
     public void startAll() {
         int servicesSize = allServicesOrder.size();
@@ -180,17 +198,17 @@ public class DepManager
 
         for (int i = 0; i < servicesSize; i++) {
             if ( !allServicesOrder.get(i).isRunning() ) {
-                start(allServicesOrder.get(i).getId());
+                start(allServicesOrder.get(i).getId(), ( i > 0 && allServicesOrder.get(i - 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
             }
         }
     }
 
     /**
     * Stop Service
-    * @param  services  receive list of available services
     * @param  index     receive Service index to stop
+    * @param  noWait    boolean indicating if the wait is needed
     */
-    public void stop( int index ) {
+    public void stop( int index, boolean noWait ) {
         Service service = services.get(index);
         Iterator<Integer> requirements;
         Integer requirementIndex;
@@ -201,19 +219,31 @@ public class DepManager
 
             if ( DEBUG ) System.out.println("[DEBUG] " + index + " required by " + requirementIndex + ".");
             if ( services.get( requirementIndex ).isRunning() ) {
-                stop(requirementIndex);
+                stop(requirementIndex, false);
             }
         }
 
         if ( DEBUG ) System.out.println("[DEBUG] Stopping service " + index + ".");
-        service.setRunning(false);
-        service.stop();
+        if (noWait) {
+            service.stop();
+        } else {
+            try {
+                synchronized (MONITOR) {
+                    service.stop();
+                    MONITOR.wait();
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Gotta go, can't wait!");
+                Thread.currentThread().interrupt();
+            }
+        }
+
         if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " stopped.");
     }
 
     /**
     * Stop all Services
-    * @param  services  receive list of available services
+    *
     */
     public void stopAll() {
         int servicesSize = allServicesOrder.size();
@@ -222,7 +252,7 @@ public class DepManager
 
         for (int i = servicesSize - 1; i >= 0; i--) {
             if ( services.get(i).isRunning() ) {
-                stop(allServicesOrder.get(i).getId());
+                stop(allServicesOrder.get(i).getId(), ( i < (servicesSize - 1) && allServicesOrder.get(i + 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
             }
         }
     }
