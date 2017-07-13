@@ -3,6 +3,8 @@ package com.feedzai.app;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -27,6 +29,7 @@ public class DepManager
     private static final boolean DEBUG = true;
 
     private ArrayList<Service> services;
+    private ArrayList<Service> allServicesOrder;
     private ArrayList<Thread> threads;
 
     /**
@@ -39,17 +42,58 @@ public class DepManager
     * Instantiate Available Services
     * @return      available services list
     */
-    public void instantiateServices () {
+    public void instantiateServices() {
         services = new ArrayList<Service>();
-        services.add(new ServiceA("1"));
-        services.add(new ServiceB("2"));
-        services.add(new ServiceC("3"));
-        services.add(new ServiceD("4"));
+        allServicesOrder = new ArrayList<Service>();
+        services.add(new ServiceA(0));
+        services.add(new ServiceB(1));
+        services.add(new ServiceC(2));
+        services.add(new ServiceD(3));
 
         threads = new ArrayList<Thread>();
         for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
             threads.add(new Thread());
         }
+    }
+
+    /**
+    * Update Ranking of a Service and its dependencies
+    *
+    */
+    private void updateRanking(int index) {
+        Iterator<Integer> it = services.get(index).getDependencies();
+        int serviceIndex;
+
+        while ( it.hasNext() ) {
+            serviceIndex = it.next();
+            if ( services.get(serviceIndex).getRanking() == 0 ) {
+                updateRanking( serviceIndex );
+            }
+            services.get(index).incrementRanking( services.get(serviceIndex).getRanking() );
+            services.get(index).incrementRanking(1);
+        }
+    }
+
+    /**
+    * Update Rankings
+    * Sort the Services in an Ascending order of ranking
+    */
+    private void updateAllRankings() {
+
+        for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
+            if ( services.get(i).getRanking() == 0 ) {
+                updateRanking(i);
+            }
+        }
+
+        allServicesOrder = new ArrayList<Service>(services);
+        Collections.sort(allServicesOrder, new Comparator<Service>() {
+            @Override
+            public int compare(Service a, Service b)
+            {
+                return a.getRanking().compareTo(b.getRanking());
+            }
+        });
     }
 
     /**
@@ -93,6 +137,8 @@ public class DepManager
             }
 		}
 
+        this.updateAllRankings();
+
         return true;
     }
 
@@ -128,13 +174,13 @@ public class DepManager
     * @param  services  receive list of available services
     */
     public void startAll() {
-        int servicesSize = services.size();
+        int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting all Services.");
 
         for (int i = 0; i < servicesSize; i++) {
-            if ( !services.get(i).isRunning() ) {
-                start(i);
+            if ( !allServicesOrder.get(i).isRunning() ) {
+                start(allServicesOrder.get(i).getId());
             }
         }
     }
@@ -170,13 +216,13 @@ public class DepManager
     * @param  services  receive list of available services
     */
     public void stopAll() {
-        int servicesSize = services.size();
+        int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Stopping all Services.");
 
-        for (int i = 0; i < servicesSize; i++) {
+        for (int i = servicesSize - 1; i >= 0; i--) {
             if ( services.get(i).isRunning() ) {
-                stop(i);
+                stop(allServicesOrder.get(i).getId());
             }
         }
     }
@@ -186,8 +232,47 @@ public class DepManager
     * @param  index  receive Service index to kill
     */
     public void kill( int index ) {
+        Service service = services.get(index);
+        Iterator<Integer> requirements;
+        Integer requirementIndex;
+
+        if ( !services.get(index).isRunning() ) {
+            return;
+        }
+
+        requirements = service.getRequirements();
+        while (requirements.hasNext()) {
+            requirementIndex = requirements.next();
+
+            if ( DEBUG ) System.out.println("[DEBUG] " + index + " required by " + requirementIndex + ".");
+            if ( services.get( requirementIndex ).isRunning() ) {
+                kill(requirementIndex);
+            }
+        }
+
+        if ( DEBUG ) System.out.println("[DEBUG] Killing service " + index + ".");
         services.get(index).setRunning(false);
-        (new Thread(threads.get(index))).interrupt();
+        threads.get(index).interrupt();
+        if ( DEBUG ) System.out.println("[DEBUG] Service " + index + " killed.");
+    }
+
+    /**
+    * List all the running Services
+    * @return  list of running services
+    */
+    public ArrayList<Service> getRunningServices() {
+        ArrayList<Service> output = new ArrayList<Service>();
+        Service service;
+        int len = services.size();
+
+        for (int i = 0; i < len; i++) {
+            service = services.get(i);
+            if ( service.isRunning() ) {
+                output.add(service);
+            }
+        }
+
+        return output;
     }
 
 }

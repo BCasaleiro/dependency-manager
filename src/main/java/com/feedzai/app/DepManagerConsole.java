@@ -1,5 +1,6 @@
 package com.feedzai.app;
 
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Hashtable;
 
@@ -29,6 +30,16 @@ public class DepManagerConsole
         System.out.println("info");
         System.out.println("exit");
         System.out.println("|----------------------------------|");
+    }
+
+    private static void printRunningServices( ArrayList<Service> runningServices ) {
+        int len = runningServices.size();
+
+        System.out.println("|-----------LIST-----------|");
+        for (int i = 0; i < len; i++) {
+            System.out.println("ID: " + runningServices.get(i).getId());
+        }
+        System.out.println("|--------------------------|");
     }
 
     public static void main( String[] args )
@@ -73,6 +84,8 @@ public class DepManagerConsole
                     }
                 } else if ( cmd[0].equals("info") ) {
                     printMenu();
+                } else if ( cmd[0].equals("list") ) {
+                    printRunningServices( dm.getRunningServices() );
                 } else {
                     System.out.println("Not a valid command.");
                 }

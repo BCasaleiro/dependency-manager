@@ -8,9 +8,9 @@ import java.lang.InterruptedException;
  */
 public class ServiceA extends Service
 {
-    public ServiceA (String monitor)
+    public ServiceA (int id)
     {
-        this.monitor = monitor;
+        super(id);
     }
 
     public void start()

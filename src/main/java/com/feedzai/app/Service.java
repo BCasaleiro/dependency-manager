@@ -13,7 +13,16 @@ public abstract class Service implements Runnable
     private ArrayList<Integer> requiredBy= new ArrayList<Integer>();
 
     protected Boolean running = false;
-    public String monitor;
+
+    protected String monitor;
+    protected int id;
+    private Integer ranking;
+
+    public Service(int id) {
+        this.monitor = Integer.toString(id);
+        this.id = id;
+        this.ranking = 0;
+    }
 
     public abstract void start();
     public abstract void stop();
@@ -21,6 +30,10 @@ public abstract class Service implements Runnable
     public void run()
     {
         start();
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Iterator<Integer> getDependencies() {
@@ -53,5 +66,17 @@ public abstract class Service implements Runnable
 
     public Boolean isRunning() {
         return running;
+    }
+
+    public void incrementRanking(int ammount) {
+        this.ranking += ammount;
+    }
+
+    public void setRanking(Integer ranking) {
+        this.ranking = ranking;
+    }
+
+    public Integer getRanking() {
+        return ranking;
     }
 }
