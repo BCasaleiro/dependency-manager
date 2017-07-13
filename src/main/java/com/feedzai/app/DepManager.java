@@ -41,7 +41,7 @@ public class DepManager
 
     /**
     * Instantiate Available Services
-    * @return      available services list
+    * @return   available services list
     */
     public void instantiateServices()
     {
