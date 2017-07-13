@@ -19,7 +19,12 @@ public class DepManagerConsole
         put("d", 3);
     }};
 
-    private static void printMenu() {
+    /**
+     * Print Console Menu
+     *
+     */
+    private static void printMenu()
+    {
         System.out.println("Available Services: [a, b, c, d]");
         System.out.println("MENU:");
         System.out.println("start [service]");
@@ -32,7 +37,12 @@ public class DepManagerConsole
         System.out.println("|----------------------------------|");
     }
 
-    private static void printRunningServices( ArrayList<Service> runningServices ) {
+    /**
+     * List all the currently running Services
+     * @param runningServices list of running services
+     */
+    private static void printRunningServices( ArrayList<Service> runningServices )
+    {
         int len = runningServices.size();
 
         System.out.println("|-----------LIST-----------|");
@@ -42,6 +52,10 @@ public class DepManagerConsole
         System.out.println("|--------------------------|");
     }
 
+    /**
+     * Main method
+     * @param args call arguments
+     */
     public static void main( String[] args )
     {
         DepManager dm = new DepManager();
