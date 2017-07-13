@@ -12,6 +12,7 @@ public class DepManagerConsole
 {
     private static final boolean DEBUG = false;
     private static final String DELIMITER = " ";
+    private static final String MONITOR = "MASTER";
     private static final Hashtable<String, Integer> AVAILABLE_SERVICES = new Hashtable<String, Integer>() {{
         put("a", 0);
         put("b", 1);
@@ -58,12 +59,18 @@ public class DepManagerConsole
      */
     public static void main( String[] args )
     {
-        DepManager dm = new DepManager();
+        DepManager dm = new DepManager(MONITOR, "dependencies.csv");
         Scanner scanner;
         String aux;
         String[] cmd;
 
-        dm.instantiateServices();
+        ArrayList<Service> services = new ArrayList<Service>();
+        services.add(new ServiceA(0, MONITOR));
+        services.add(new ServiceB(1, MONITOR));
+        services.add(new ServiceC(2, MONITOR));
+        services.add(new ServiceD(3, MONITOR));
+
+        dm.instantiateServices(services, AVAILABLE_SERVICES);
         if ( DEBUG ) System.out.println("[DEBUG] Instantiated Services.");
 
         if (dm.loadDependencies()) {

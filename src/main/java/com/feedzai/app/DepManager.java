@@ -17,18 +17,13 @@ import java.io.IOException;
  */
 public class DepManager
 {
-    private static final String FILE = "dependencies.csv";
-    private static final String DELIMITER = " ";
-    private static final String MONITOR = "MASTER";
-    private static final Hashtable<String, Integer> AVAILABLE_SERVICES = new Hashtable<String, Integer>() {{
-        put("a", 0);
-        put("b", 1);
-        put("c", 2);
-        put("d", 3);
-    }};
-
     private static final boolean DEBUG = true;
+    private static final String DELIMITER = " ";
 
+    private String monitor;
+    private String file;
+
+    private Hashtable<String, Integer> availableServices;
     private ArrayList<Service> services;
     private ArrayList<Service> allServicesOrder;
     private ArrayList<Thread> threads;
@@ -37,24 +32,27 @@ public class DepManager
     * Basic Dependency Manager Constructor
     *
     */
-    public DepManager() { }
+    public DepManager(String monitor, String file)
+    {
+        this.monitor = monitor;
+        this.file = file;
+    }
 
     /**
     * Instantiate Available Services
-    * 
+    *
     */
-    public void instantiateServices()
+    public void instantiateServices(ArrayList<Service> services, Hashtable<String, Integer> availableServices)
     {
-        services = new ArrayList<Service>();
-        allServicesOrder = new ArrayList<Service>();
-        services.add(new ServiceA(0, MONITOR));
-        services.add(new ServiceB(1, MONITOR));
-        services.add(new ServiceC(2, MONITOR));
-        services.add(new ServiceD(3, MONITOR));
+        this.services = new ArrayList<Service>();
+        this.services.addAll(services);
 
-        threads = new ArrayList<Thread>();
-        for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
-            threads.add(new Thread());
+        this.availableServices = new Hashtable<String, Integer>();
+        this.availableServices.putAll(availableServices);
+
+        this.threads = new ArrayList<Thread>();
+        for (int i = 0; i < services.size(); i++) {
+            this.threads.add(new Thread());
         }
     }
 
@@ -70,15 +68,15 @@ public class DepManager
         String[] dependency;
 
         try {
-            fr = new FileReader(FILE);
+            fr = new FileReader(file);
             br = new BufferedReader(fr);
 
             while ((line = br.readLine()) != null) {
                 dependency = line.split(DELIMITER);
 
-                if ( AVAILABLE_SERVICES.containsKey(dependency[0]) && AVAILABLE_SERVICES.containsKey(dependency[1]) ) {
-                    services.get( AVAILABLE_SERVICES.get(dependency[0]) ).addDependency( AVAILABLE_SERVICES.get(dependency[1]) );
-                    services.get( AVAILABLE_SERVICES.get(dependency[1]) ).addRequirement( AVAILABLE_SERVICES.get(dependency[0]) );
+                if ( availableServices.containsKey(dependency[0]) && availableServices.containsKey(dependency[1]) ) {
+                    services.get( availableServices.get(dependency[0]) ).addDependency( availableServices.get(dependency[1]) );
+                    services.get( availableServices.get(dependency[1]) ).addRequirement( availableServices.get(dependency[0]) );
                 } else {
                     return false;
                 }
@@ -131,7 +129,7 @@ public class DepManager
     private void updateAllRankings()
     {
 
-        for (int i = 0; i < AVAILABLE_SERVICES.size(); i++) {
+        for (int i = 0; i < availableServices.size(); i++) {
             if ( services.get(i).getRanking() == 0 ) {
                 updateRanking(i);
             }
@@ -178,9 +176,9 @@ public class DepManager
             threads.get(index).start();
         } else {
             try {
-                synchronized (MONITOR) {
+                synchronized (monitor) {
                     threads.get(index).start();
-                    MONITOR.wait();
+                    monitor.wait();
                 }
             } catch (InterruptedException e) {
                 System.out.println("Gotta go, can't wait!");
@@ -235,9 +233,9 @@ public class DepManager
             service.stop();
         } else {
             try {
-                synchronized (MONITOR) {
+                synchronized (monitor) {
                     service.stop();
-                    MONITOR.wait();
+                    monitor.wait();
                 }
             } catch (InterruptedException e) {
                 System.out.println("Gotta go, can't wait!");
