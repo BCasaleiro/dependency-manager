@@ -67,6 +67,10 @@ public class DepManager
         String line;
         String[] dependency;
 
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return false;
+        }
+
         try {
             fr = new FileReader(file);
             br = new BufferedReader(fr);
@@ -157,6 +161,10 @@ public class DepManager
     */
     public void start( int index, boolean noWait )
     {
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return;
+        }
+
         Service service = services.get(index);
         Iterator<Integer> dependencies;
         Integer dependencyIndex;
@@ -203,6 +211,10 @@ public class DepManager
     */
     public void startAll()
     {
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return;
+        }
+
         int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting all Services.");
@@ -221,6 +233,10 @@ public class DepManager
     */
     public void stop( int index, boolean noWait )
     {
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return;
+        }
+
         Service service = services.get(index);
         Iterator<Integer> requirements;
         Integer requirementIndex;
@@ -261,6 +277,10 @@ public class DepManager
     */
     public void stopAll()
     {
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return;
+        }
+
         int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Stopping all Services.");
@@ -278,6 +298,10 @@ public class DepManager
     */
     public void kill( int index )
     {
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return;
+        }
+
         Service service = services.get(index);
         Iterator<Integer> requirements;
         Integer requirementIndex;
@@ -310,6 +334,10 @@ public class DepManager
     */
     public ArrayList<Service> getRunningServices()
     {
+        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+            return new ArrayList<Service>();
+        }
+
         ArrayList<Service> output = new ArrayList<Service>();
         Service service;
         int len = services.size();

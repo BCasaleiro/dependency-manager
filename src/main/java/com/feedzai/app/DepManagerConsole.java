@@ -115,7 +115,7 @@ public class DepManagerConsole
             if ( DEBUG ) System.out.println("[DEBUG] Cleaning Up.");
             dm.stopAll();
         } else {
-            System.out.println("[ERROR] Invalid dependencies file.");
+            System.out.println("[ERROR]");
         }
     }
 }
