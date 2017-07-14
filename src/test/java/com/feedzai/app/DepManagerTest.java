@@ -73,6 +73,11 @@ public class DepManagerTest
         dm.instantiateServices(services, AVAILABLE_SERVICES);
         dm.loadDependencies("dependencies.csv");
         dm.start(1, false);
+        try{
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         assertTrue( dm.getRunningServices().size() == 2 );
     }
 
@@ -84,6 +89,11 @@ public class DepManagerTest
         dm.instantiateServices(services, AVAILABLE_SERVICES);
         dm.loadDependencies("dependencies.csv");
         dm.startAll();
+        try{
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         assertTrue( dm.getRunningServices().size() == 4 );
     }
 
@@ -96,6 +106,11 @@ public class DepManagerTest
         dm.loadDependencies("dependencies.csv");
         dm.start(1, false);
         dm.stop(1, false);
+        try{
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         assertTrue( dm.getRunningServices().size() == 1 );
     }
 
@@ -108,6 +123,11 @@ public class DepManagerTest
         dm.loadDependencies("dependencies.csv");
         dm.startAll();
         dm.stopAll();
+        try{
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         assertTrue( dm.getRunningServices().size() == 0 );
     }
 
@@ -120,6 +140,11 @@ public class DepManagerTest
         dm.loadDependencies("dependencies.csv");
         dm.start(3, false);
         dm.kill(1);
+        try{
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         assertTrue( dm.getRunningServices().size() == 1 );
     }
 
@@ -131,6 +156,11 @@ public class DepManagerTest
         dm.instantiateServices(services, AVAILABLE_SERVICES);
         dm.loadDependencies("dependencies.csv");
         dm.startAll();
+        try{
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         assertTrue( dm.getRunningServices().get(2).getNumberOfDependencies() == 1 );
     }
 
@@ -139,18 +169,31 @@ public class DepManagerTest
      */
     public void testSystem() {
         DepManager dm = new DepManager(MONITOR);
-        dm.instantiateServices(services, AVAILABLE_SERVICES);
-        dm.loadDependencies("dependencies.csv");
-        dm.startAll();
-        assertTrue( dm.getRunningServices().size() == AVAILABLE_SERVICES.size() );
-        dm.stop(1, false);
-        assertTrue( dm.getRunningServices().size() == 2 );
-        dm.start(3, false);
-        assertTrue( dm.getRunningServices().size() == AVAILABLE_SERVICES.size() );
-        dm.stopAll();
-        assertTrue( dm.getRunningServices().size() == 0 );
-        dm.start(1, false);
-        dm.kill(0);
-        assertTrue( dm.getRunningServices().size() == 0 );
+        try {
+            dm.instantiateServices(services, AVAILABLE_SERVICES);
+            dm.loadDependencies("dependencies.csv");
+            dm.startAll();
+            Thread.sleep(100);
+            assertTrue( dm.getRunningServices().size() == AVAILABLE_SERVICES.size() );
+
+            dm.stop(1, false);
+            Thread.sleep(100);
+            assertTrue( dm.getRunningServices().size() == 2 );
+
+            dm.start(3, false);
+            Thread.sleep(100);
+            assertTrue( dm.getRunningServices().size() == AVAILABLE_SERVICES.size() );
+
+            dm.stopAll();
+            Thread.sleep(100);
+            assertTrue( dm.getRunningServices().size() == 0 );
+
+            dm.start(1, false);
+            dm.kill(0);
+            Thread.sleep(100);
+            assertTrue( dm.getRunningServices().size() == 0 );
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
