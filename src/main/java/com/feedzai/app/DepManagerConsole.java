@@ -11,14 +11,9 @@ import java.util.Hashtable;
 public class DepManagerConsole
 {
     private static final boolean DEBUG = false;
+    private static final boolean TESTA = true;
     private static final String DELIMITER = " ";
     private static final String MONITOR = "MASTER";
-    private static final Hashtable<String, Integer> AVAILABLE_SERVICES = new Hashtable<String, Integer>() {{
-        put("a", 0);
-        put("b", 1);
-        put("c", 2);
-        put("d", 3);
-    }};
 
     /**
      * Print Console Menu
@@ -63,14 +58,41 @@ public class DepManagerConsole
         Scanner scanner;
         String aux;
         String[] cmd;
+        ArrayList<Service> services;
+        Hashtable<String, Integer> availableServices;
 
-        ArrayList<Service> services = new ArrayList<Service>();
-        services.add(new ServiceA(0, MONITOR));
-        services.add(new ServiceB(1, MONITOR));
-        services.add(new ServiceC(2, MONITOR));
-        services.add(new ServiceD(3, MONITOR));
+        if (TESTA) {
+            availableServices = new Hashtable<String, Integer>() {{
+                put("a", 0);
+                put("b", 1);
+                put("c", 2);
+                put("d", 3);
+            }};
 
-        dm.instantiateServices(services, AVAILABLE_SERVICES);
+            services = new ArrayList<Service>();
+            for (int i = 0; i < 4; i++) {
+                services.add(new ServiceDummy(i, MONITOR));
+            }
+        } else {
+            availableServices = new Hashtable<String, Integer>() {{
+                put("a", 0);
+                put("b", 1);
+                put("c", 2);
+                put("d", 3);
+                put("e", 4);
+                put("f", 5);
+                put("k", 6);
+                put("i", 7);
+            }};
+
+            services = new ArrayList<Service>();
+            for (int i = 0; i < 8; i++) {
+                services.add(new ServiceDummy(i, MONITOR));
+            }
+        }
+
+
+        dm.instantiateServices(services, availableServices);
         if ( DEBUG ) System.out.println("[DEBUG] Instantiated Services.");
 
         if (dm.loadDependencies()) {
@@ -82,24 +104,24 @@ public class DepManagerConsole
             while (!(aux = scanner.nextLine()).equals("exit")) {
                 cmd = aux.split(DELIMITER);
                 if( cmd[0].equals("start") ) {
-                    if ( AVAILABLE_SERVICES.containsKey(cmd[1]) ) {
-                        dm.start( AVAILABLE_SERVICES.get(cmd[1]), true );
+                    if ( availableServices.containsKey(cmd[1]) ) {
+                        dm.start( availableServices.get(cmd[1]), true );
                     } else {
                         System.out.println("Not an available Service.");
                     }
                 } else if ( cmd[0].equals("startall") ) {
                     dm.startAll();
                 } else if ( cmd[0].equals("stop") ) {
-                    if ( AVAILABLE_SERVICES.containsKey(cmd[1]) ) {
-                        dm.stop( AVAILABLE_SERVICES.get(cmd[1]), true );
+                    if ( availableServices.containsKey(cmd[1]) ) {
+                        dm.stop( availableServices.get(cmd[1]), true );
                     } else {
                         System.out.println("Not an available Service.");
                     }
                 } else if ( cmd[0].equals("stopall") ) {
                     dm.stopAll();
                 } else if ( cmd[0].equals("kill") ) {
-                    if ( AVAILABLE_SERVICES.containsKey(cmd[1]) ) {
-                        dm.kill( AVAILABLE_SERVICES.get(cmd[1]) );
+                    if ( availableServices.containsKey(cmd[1]) ) {
+                        dm.kill( availableServices.get(cmd[1]) );
                     } else {
                         System.out.println("Not an available Service.");
                     }

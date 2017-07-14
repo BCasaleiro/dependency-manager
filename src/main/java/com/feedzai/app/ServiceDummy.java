@@ -3,19 +3,18 @@ package com.feedzai.app;
 import java.lang.InterruptedException;
 
 /**
- * Dummy Test Service
- * Service C
+ * Dummy Test Service Class
  */
-public class ServiceC extends Service
+public class ServiceDummy extends Service
 {
-    public ServiceC (int id, String master)
+    public ServiceDummy (int id, String master)
     {
         super(id, master);
     }
 
     public void start()
     {
-        System.out.println("[C] I am here! I am helping!");
+        System.out.println("[" + id + "] I am here! I am helping!");
     }
 
     public void service() {
@@ -31,7 +30,7 @@ public class ServiceC extends Service
 
     public void stop()
     {
-        System.out.println("[C] Stopping. Bye!");
+        System.out.println("[A] Stopping. Bye!");
         synchronized (monitor) {
             monitor.notify();
             running = false;
