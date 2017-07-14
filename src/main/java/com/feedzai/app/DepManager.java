@@ -67,7 +67,7 @@ public class DepManager
         String line;
         String[] dependency;
 
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return false;
         }
 
@@ -155,13 +155,31 @@ public class DepManager
     }
 
     /**
+    * Check Integrity
+    * Check if Services have been Instantiated
+    * Check if there are Services Available
+    */
+    private boolean checkIntegrity()
+    {
+        if ( availableServices == null || services == null ) {
+            System.out.println("Services not instantiated.\nCall instantiateServices(ArrayList<Service> services, Hashtable<String, Integer> availableServices)");
+        }
+
+        if ( availableServices.size() == 0 || services.size() == 0 ) {
+            System.out.println("No available Services.");
+        }
+
+        return false;
+    }
+
+    /**
     * Start Service
     * @param  index     receive Service index to start
     * @param  noWait    boolean indicating if the wait is needed
     */
     public void start( int index, boolean noWait )
     {
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return;
         }
 
@@ -211,7 +229,7 @@ public class DepManager
     */
     public void startAll()
     {
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return;
         }
 
@@ -233,7 +251,7 @@ public class DepManager
     */
     public void stop( int index, boolean noWait )
     {
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return;
         }
 
@@ -277,7 +295,7 @@ public class DepManager
     */
     public void stopAll()
     {
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return;
         }
 
@@ -298,7 +316,7 @@ public class DepManager
     */
     public void kill( int index )
     {
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return;
         }
 
@@ -334,7 +352,7 @@ public class DepManager
     */
     public ArrayList<Service> getRunningServices()
     {
-        if ( availableServices == null || availableServices.size() == 0 || services == null || services.size() == 0 ) {
+        if ( checkIntegrity() ) {
             return new ArrayList<Service>();
         }
 
