@@ -1,5 +1,5 @@
-# Ignore build script
-script.sh
+# Ignore csv test files
+*.csv
 
 # Maven files
 target/
