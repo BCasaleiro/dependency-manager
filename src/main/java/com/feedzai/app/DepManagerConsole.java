@@ -11,7 +11,7 @@ import java.util.Hashtable;
 public class DepManagerConsole
 {
     private static final boolean DEBUG = false;
-    private static final boolean TESTA = true;
+    private static final boolean TESTA = false;
     private static final String DELIMITER = " ";
     private static final String MONITOR = "MASTER";
 
@@ -21,7 +21,6 @@ public class DepManagerConsole
      */
     private static void printMenu()
     {
-        System.out.println("Available Services: [a, b, c, d]");
         System.out.println("MENU:");
         System.out.println("start [service]");
         System.out.println("startall");
@@ -54,7 +53,7 @@ public class DepManagerConsole
      */
     public static void main( String[] args )
     {
-        DepManager dm = new DepManager(MONITOR, "dependencies.csv");
+        DepManager dm;
         Scanner scanner;
         String aux;
         String[] cmd;
@@ -62,6 +61,8 @@ public class DepManagerConsole
         Hashtable<String, Integer> availableServices;
 
         if (TESTA) {
+            dm = new DepManager(MONITOR, "dependencies.csv");
+
             availableServices = new Hashtable<String, Integer>() {{
                 put("a", 0);
                 put("b", 1);
@@ -74,6 +75,8 @@ public class DepManagerConsole
                 services.add(new ServiceDummy(i, MONITOR));
             }
         } else {
+            dm = new DepManager(MONITOR, "dependencies1.csv");
+
             availableServices = new Hashtable<String, Integer>() {{
                 put("a", 0);
                 put("b", 1);
