@@ -18,6 +18,17 @@ public class ServiceA extends Service
         System.out.println("[A] I am here! I am helping!");
     }
 
+    public void service() {
+        try {
+            synchronized (monitor) {
+                monitor.wait();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Ohhh noo!");
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void stop()
     {
         System.out.println("[A] Stopping. Bye!");

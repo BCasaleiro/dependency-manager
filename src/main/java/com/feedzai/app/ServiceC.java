@@ -18,6 +18,17 @@ public class ServiceC extends Service
         System.out.println("[C] I am here! I am helping!");
     }
 
+    public void service() {
+        try {
+            synchronized (monitor) {
+                monitor.wait();
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Ohhh noo!");
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public void stop()
     {
         System.out.println("[C] Stopping. Bye!");

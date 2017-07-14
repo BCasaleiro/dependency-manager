@@ -38,6 +38,7 @@ public abstract class Service implements Runnable
     }
 
     public abstract void start();
+    public abstract void service();
     public abstract void stop();
 
     /**
@@ -53,14 +54,7 @@ public abstract class Service implements Runnable
             master.notify();
         }
 
-        try {
-            synchronized (monitor) {
-                monitor.wait();
-            }
-        } catch (InterruptedException e) {
-            System.out.println("Ohhh noo!");
-            Thread.currentThread().interrupt();
-        }
+        service();
 
         synchronized (master) {
             master.notify();
