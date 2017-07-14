@@ -59,10 +59,12 @@ public class DepManagerConsole
         String[] cmd;
         ArrayList<Service> services;
         Hashtable<String, Integer> availableServices;
+        String file;
+
+        dm = new DepManager(MONITOR);
 
         if (TESTA) {
-            dm = new DepManager(MONITOR, "dependencies.csv");
-
+            file = "dependencies.csv";
             availableServices = new Hashtable<String, Integer>() {{
                 put("a", 0);
                 put("b", 1);
@@ -71,12 +73,11 @@ public class DepManagerConsole
             }};
 
             services = new ArrayList<Service>();
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < availableServices.size(); i++) {
                 services.add(new ServiceDummy(i, MONITOR));
             }
         } else {
-            dm = new DepManager(MONITOR, "dependencies1.csv");
-
+            file = "dependencies1.csv";
             availableServices = new Hashtable<String, Integer>() {{
                 put("a", 0);
                 put("b", 1);
@@ -86,10 +87,11 @@ public class DepManagerConsole
                 put("f", 5);
                 put("k", 6);
                 put("i", 7);
+                put("j", 8);
             }};
 
             services = new ArrayList<Service>();
-            for (int i = 0; i < 8; i++) {
+            for (int i = 0; i < availableServices.size(); i++) {
                 services.add(new ServiceDummy(i, MONITOR));
             }
         }
@@ -98,7 +100,7 @@ public class DepManagerConsole
         dm.instantiateServices(services, availableServices);
         if ( DEBUG ) System.out.println("[DEBUG] Instantiated Services.");
 
-        if (dm.loadDependencies()) {
+        if (dm.loadDependencies(file)) {
             if ( DEBUG ) System.out.println("[DEBUG] Dependencies Loaded.");
 
             printMenu();

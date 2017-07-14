@@ -17,11 +17,10 @@ import java.io.IOException;
  */
 public class DepManager
 {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String DELIMITER = " ";
 
     private String monitor;
-    private String file;
 
     private Hashtable<String, Integer> availableServices;
     private ArrayList<Service> services;
@@ -30,17 +29,17 @@ public class DepManager
 
     /**
     * Basic Dependency Manager Constructor
-    *
+    * @param monitor Master Lock
     */
-    public DepManager(String monitor, String file)
+    public DepManager(String monitor)
     {
         this.monitor = monitor;
-        this.file = file;
     }
 
     /**
     * Instantiate Available Services
-    *
+    * @param services           services available
+    * @param availableServices  service to handle correspondence
     */
     public void instantiateServices(ArrayList<Service> services, Hashtable<String, Integer> availableServices)
     {
@@ -58,9 +57,10 @@ public class DepManager
 
     /**
     * Load dependencies
+    * @param file       filename used to load dependencies
     * @return           if there are problems in the file
     */
-    public Boolean loadDependencies()
+    public Boolean loadDependencies(String file)
     {
         FileReader fr = null;
         BufferedReader br = null;
@@ -188,6 +188,7 @@ public class DepManager
         Integer dependencyIndex;
 
         if (service.isRunning()) {
+            System.out.println("Service already running.");
             return;
         }
 
@@ -200,6 +201,10 @@ public class DepManager
             if ( !services.get( dependencyIndex ).isRunning() ) {
                 start(dependencyIndex, false);
             }
+        }
+
+        if ( threads.get(index).isAlive() ) {
+            return;
         }
 
         if ( DEBUG ) System.out.println("[DEBUG] Starting service " + index + ".");
@@ -239,7 +244,7 @@ public class DepManager
 
         for (int i = 0; i < servicesSize; i++) {
             if ( !allServicesOrder.get(i).isRunning() ) {
-                start(allServicesOrder.get(i).getId(), ( i > 0 && allServicesOrder.get(i - 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
+                start(allServicesOrder.get(i).getId(), ( i > 0 && allServicesOrder.get(i).getNumberOfDependencies() < 2 && allServicesOrder.get(i - 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
             }
         }
     }
@@ -258,6 +263,11 @@ public class DepManager
         Service service = services.get(index);
         Iterator<Integer> requirements;
         Integer requirementIndex;
+
+        if (!service.isRunning()) {
+            System.out.println("Service already stopped.");
+            return;
+        }
 
         requirements = service.getRequirements();
         while (requirements.hasNext()) {
@@ -302,10 +312,9 @@ public class DepManager
         int servicesSize = allServicesOrder.size();
 
         if ( DEBUG ) System.out.println("[DEBUG] Stopping all Services.");
-
         for (int i = servicesSize - 1; i >= 0; i--) {
             if ( services.get(i).isRunning() ) {
-                stop(allServicesOrder.get(i).getId(), ( i < (servicesSize - 1) && allServicesOrder.get(i + 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
+                stop(allServicesOrder.get(i).getId(), ( i < (servicesSize - 1) && (allServicesOrder.get(i + 1).getRanking() == allServicesOrder.get(i).getRanking()) ) );
             }
         }
     }

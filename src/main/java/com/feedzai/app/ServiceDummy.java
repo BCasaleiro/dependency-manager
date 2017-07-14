@@ -30,10 +30,9 @@ public class ServiceDummy extends Service
 
     public void stop()
     {
-        System.out.println("[A] Stopping. Bye!");
+        System.out.println("[" + id + "] Stopping. Bye!");
         synchronized (monitor) {
             monitor.notify();
-            running = false;
         }
     }
 }

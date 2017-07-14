@@ -55,7 +55,7 @@ public abstract class Service implements Runnable
         }
 
         service();
-
+        running = false;
         synchronized (master) {
             master.notify();
         }
@@ -77,6 +77,14 @@ public abstract class Service implements Runnable
     public Iterator<Integer> getDependencies()
     {
         return dependsOn.iterator();
+    }
+
+    /**
+     * Get Number of Dependencies
+     * @return size of depends on
+     */
+    public int getNumberOfDependencies() {
+        return dependsOn.size();
     }
 
     /**
