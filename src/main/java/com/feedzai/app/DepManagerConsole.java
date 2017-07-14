@@ -110,7 +110,7 @@ public class DepManagerConsole
                 cmd = aux.split(DELIMITER);
                 if( cmd[0].equals("start") ) {
                     if ( availableServices.containsKey(cmd[1]) ) {
-                        dm.start( availableServices.get(cmd[1]), true );
+                        dm.start( availableServices.get(cmd[1]), false );
                     } else {
                         System.out.println("Not an available Service.");
                     }
@@ -118,7 +118,7 @@ public class DepManagerConsole
                     dm.startAll();
                 } else if ( cmd[0].equals("stop") ) {
                     if ( availableServices.containsKey(cmd[1]) ) {
-                        dm.stop( availableServices.get(cmd[1]), true );
+                        dm.stop( availableServices.get(cmd[1]), false );
                     } else {
                         System.out.println("Not an available Service.");
                     }

@@ -244,7 +244,7 @@ public class DepManager
 
         for (int i = 0; i < servicesSize; i++) {
             if ( !allServicesOrder.get(i).isRunning() ) {
-                start(allServicesOrder.get(i).getId(), ( i > 0 && allServicesOrder.get(i).getNumberOfDependencies() < 2 && allServicesOrder.get(i - 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
+                start(allServicesOrder.get(i).getId(), ( i > 0 && allServicesOrder.get(i - 1).getRanking() == allServicesOrder.get(i).getRanking() ) );
             }
         }
     }
