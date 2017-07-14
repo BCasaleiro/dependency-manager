@@ -112,7 +112,7 @@ public class DepManager
 
     /**
     * Update Ranking of a Service and its dependencies
-    *
+    * @param  index     index of the Service to update
     */
     private void updateRanking(int index)
     {
@@ -158,15 +158,18 @@ public class DepManager
     * Check Integrity
     * Check if Services have been Instantiated
     * Check if there are Services Available
+    * @return if there is an error
     */
     private boolean checkIntegrity()
     {
         if ( availableServices == null || services == null ) {
             System.out.println("Services not instantiated.\nCall instantiateServices(ArrayList<Service> services, Hashtable<String, Integer> availableServices)");
+            return true;
         }
 
         if ( availableServices.size() == 0 || services.size() == 0 ) {
             System.out.println("No available Services.");
+            return true;
         }
 
         return false;
